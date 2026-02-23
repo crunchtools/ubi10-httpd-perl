@@ -6,7 +6,7 @@ LABEL description="UBI 10 base image with Apache httpd, mod_fcgid, Perl, and Mar
 # Register with RHSM to access full RHEL repos
 RUN --mount=type=secret,id=activation_key \
     --mount=type=secret,id=org_id \
-    if [ -f /run/secrets/activation_key ] && [ -f /run/secrets/org_id ]; then \
+    if [ -s /run/secrets/activation_key ] && [ -s /run/secrets/org_id ]; then \
         subscription-manager register \
             --activationkey="$(cat /run/secrets/activation_key)" \
             --org="$(cat /run/secrets/org_id)" && \
