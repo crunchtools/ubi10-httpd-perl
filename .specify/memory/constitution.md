@@ -1,12 +1,12 @@
 # ubi10-httpd-perl Constitution
 
-> **Version:** 1.0.0
-> **Ratified:** 2026-03-03
+> **Version:** 2.0.0
+> **Ratified:** 2026-03-10
 > **Status:** Active
 > **Inherits:** [crunchtools/constitution](https://github.com/crunchtools/constitution) v1.0.0
 > **Profile:** Container Image
 
-UBI 10 base image with Apache httpd, mod_fcgid, Perl, and MariaDB. Primary use case: hosting Request Tracker (RT).
+UBI 10 Perl runtime layer. Inherits Apache httpd from ubi10-httpd and troubleshooting tools from ubi10-core. Does NOT include any database server — use ubi10-httpd-perl-mariadb for database workloads (e.g. Request Tracker).
 
 ---
 
@@ -20,7 +20,7 @@ Follow Semantic Versioning 2.0.0. MAJOR/MINOR/PATCH.
 
 ## Base Image
 
-`registry.access.redhat.com/ubi10/ubi-init:latest` — systemd-based for multi-service containers (httpd + MariaDB).
+`quay.io/crunchtools/ubi10-httpd:latest` — inherits httpd (enabled), troubleshooting tools (iputils, bind-utils, net-tools, less), cron, procps-ng, diffutils, and systemd hardening.
 
 ## Registry
 
@@ -28,29 +28,37 @@ Published to `quay.io/crunchtools/ubi10-httpd-perl`.
 
 ## RHSM Registration
 
-Uses build-time secret mounts for subscription-manager registration to access RHEL repos for packages not available in UBI.
+Not required. mod_fcgid and perl are available in UBI repos.
 
 ## Containerfile Conventions
 
 - Uses `Containerfile` (not Dockerfile)
 - Required LABELs: `maintainer`, `description`
 - `dnf install -y` followed by `dnf clean all`
-- `subscription-manager unregister` after package installation
-- systemd services enabled: httpd, mariadb
-- systemd services masked: systemd-remount-fs, systemd-update-done, systemd-udev-trigger
-- `STOPSIGNAL SIGRTMIN+3` for proper systemd shutdown
-- `ENTRYPOINT ["/sbin/init"]`
+- No RHSM registration needed
+- Inherits from parent chain: httpd (enabled), systemd-remount-fs/systemd-update-done/systemd-udev-trigger (masked)
+- Inherits `STOPSIGNAL SIGRTMIN+3` and `ENTRYPOINT ["/sbin/init"]` from ubi10-core
 
 ## Packages Installed
 
-httpd, mod_fcgid, perl, mariadb-server, mariadb, cronie, procps-ng
+mod_fcgid, perl
+
+Inherited from ubi10-httpd: httpd
+Inherited from ubi10-core: iputils, bind-utils, net-tools, less, cronie, procps-ng, diffutils
 
 ## Testing
 
 - **Build test**: CI builds the image on every push to main
+- **Smoke tests**: httpd active, mod_fcgid loaded, Perl present, negative assertion (mariadb-server NOT installed), package integrity, inherited package verification
 - **Security scan**: Recommended (not yet implemented)
 
 ## Quality Gates
 
 1. Build — CI builds the Containerfile successfully
-2. Weekly rebuild — cron job picks up base image updates every Monday 6 AM UTC
+2. Test — smoke tests pass (httpd up, mod_fcgid loaded, Perl present, no MariaDB, packages verified)
+3. Push — image published only after tests pass
+4. Weekly rebuild — cron job picks up base image updates every Monday 4:30 AM UTC
+
+## Downstream Images
+
+ubi10-httpd-perl-mariadb (direct child). Changes cascade via repository_dispatch.
