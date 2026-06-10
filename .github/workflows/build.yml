@@ -133,8 +133,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.CRUNCHTOOLS_DISPATCH_TOKEN }}
         run: |
-          gh api repos/crunchtools/ubi10-httpd-perl-mariadb/dispatches \
-            -f event_type=parent-image-updated || true
+          for repo in ubi10-httpd-perl-mariadb rt; do
+            gh api repos/crunchtools/$repo/dispatches \
+              -f event_type=parent-image-updated || true
+          done
 
   validate-constitution:
     name: Constitution Validation
