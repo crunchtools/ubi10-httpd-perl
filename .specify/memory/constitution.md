@@ -1,9 +1,9 @@
 # ubi10-httpd-perl Constitution
 
-> **Version:** 2.0.0
+> **Version:** 2.0.1
 > **Ratified:** 2026-03-10
 > **Status:** Active
-> **Inherits:** [crunchtools/constitution](https://github.com/crunchtools/constitution) v1.0.0
+> **Inherits:** [crunchtools/constitution](https://github.com/crunchtools/constitution) v1.17.0
 > **Profile:** Container Image
 
 UBI 10 Perl runtime layer. Inherits Apache httpd from ubi10-httpd and troubleshooting tools from ubi10-core. Does NOT include any database server — use ubi10-httpd-perl-mariadb for database workloads (e.g. Request Tracker).
