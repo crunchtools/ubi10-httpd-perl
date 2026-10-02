@@ -1,64 +1,50 @@
 # ubi10-httpd-perl Constitution
 
-> **Version:** 2.0.1
+> **Version:** 2.1.0
 > **Ratified:** 2026-03-10
+> **Amended:** 2026-10-02
 > **Status:** Active
-> **Inherits:** [crunchtools/constitution](https://github.com/crunchtools/constitution) v1.17.0
+> **Inherits:** [crunchtools/constitution](https://github.com/crunchtools/constitution) v1.18.0
 > **Profile:** Container Image
 
-UBI 10 Perl runtime layer. Inherits Apache httpd from ubi10-httpd and troubleshooting tools from ubi10-core. Does NOT include any database server — use ubi10-httpd-perl-mariadb for database workloads (e.g. Request Tracker).
+This file holds what is specific to ubi10-httpd-perl. The fleet rules and the Container
+Image profile (license, versioning, LABELs, the RHSM secret-mount pattern,
+systemd conventions, registry, testing and quality gates) apply at the
+inherited version and are checked against this repo's files by
+`constitution.yml`. They are not restated here.
 
----
+## Purpose
 
-## License
+UBI 10 Perl runtime layer on ubi10-httpd. Published as
+`quay.io/crunchtools/ubi10-httpd-perl`.
 
-AGPL-3.0-or-later
+## Parent Image
 
-## Versioning
+`quay.io/crunchtools/ubi10-httpd:latest`. It inherits httpd (enabled) and
+everything ubi10-core provides. mod_fcgid and perl are in the UBI repos; no
+RHSM registration.
 
-Follow Semantic Versioning 2.0.0. MAJOR/MINOR/PATCH.
+## Packages and Services
 
-## Base Image
+- **Packages:** mod_fcgid, perl.
+- **Services:** none added; httpd comes enabled from the parent.
 
-`quay.io/crunchtools/ubi10-httpd:latest` — inherits httpd (enabled), troubleshooting tools (iputils, bind-utils, net-tools, less), cron, procps-ng, diffutils, and systemd hardening.
+## No Database Server
 
-## Registry
-
-Published to `quay.io/crunchtools/ubi10-httpd-perl`.
-
-## RHSM Registration
-
-Not required. mod_fcgid and perl are available in UBI repos.
-
-## Containerfile Conventions
-
-- Uses `Containerfile` (not Dockerfile)
-- Required LABELs: `maintainer`, `description`
-- `dnf install -y` followed by `dnf clean all`
-- No RHSM registration needed
-- Inherits from parent chain: httpd (enabled), systemd-remount-fs/systemd-update-done/systemd-udev-trigger (masked)
-- Inherits `STOPSIGNAL SIGRTMIN+3` and `ENTRYPOINT ["/sbin/init"]` from ubi10-core
-
-## Packages Installed
-
-mod_fcgid, perl
-
-Inherited from ubi10-httpd: httpd
-Inherited from ubi10-core: iputils, bind-utils, net-tools, less, cronie, procps-ng, diffutils
-
-## Testing
-
-- **Build test**: CI builds the image on every push to main
-- **Smoke tests**: httpd active, mod_fcgid loaded, Perl present, negative assertion (mariadb-server NOT installed), package integrity, inherited package verification
-- **Security scan**: Recommended (not yet implemented)
-
-## Quality Gates
-
-1. Build — CI builds the Containerfile successfully
-2. Test — smoke tests pass (httpd up, mod_fcgid loaded, Perl present, no MariaDB, packages verified)
-3. Push — image published only after tests pass
-4. Weekly rebuild — cron job picks up base image updates every Monday 4:30 AM UTC
+This layer carries no database server. Database workloads (e.g. Request
+Tracker) use the ubi10-httpd-perl-mariadb leaf image. The smoke test asserts
+`mariadb-server` is NOT installed, alongside httpd active, mod_fcgid loaded,
+Perl present and the inherited packages.
 
 ## Downstream Images
 
-ubi10-httpd-perl-mariadb (direct child). Changes cascade via repository_dispatch.
+Build dispatches `parent-image-updated` to ubi10-httpd-perl-mariadb and rt.
+
+## History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0.0 | 2026-03-03 | Initial Container Image profile constitution |
+| 2.0.0 | 2026-03-10 | Rebased onto ubi10-httpd; MariaDB and RHSM removed |
+| 2.0.1 | 2026-09-25 | Gatehouse review, triage and pre-commit gates |
+| 2.1.0 | 2026-10-02 | Manifest under constitution v1.18.0: profile restatement removed, image specifics kept |
